@@ -57,7 +57,7 @@ BST *newBST(
 }
 
 void *getBSTNODEvalue(BSTNODE *n){
-    return n->value;	
+	return n->value;	
 }
 
 void setBSTNODEvalue(BSTNODE *n, void *value) {
@@ -190,7 +190,7 @@ static bool isRoot(BSTNODE *x, BSTNODE *root) {
 BSTNODE *findBST(BST *t, void *value) {
     BSTNODE *x = t->root;
     while (x != NULL && t->compare(value, x->value) != 0) {
-        if (t->compare(value, x->value) < 0) {
+	if (t->compare(value, x->value) < 0) {
             x = x->left;
         }
         else x = x->right;
@@ -208,6 +208,7 @@ BSTNODE *deleteBST(BST *t, void *value) {
     }
     BSTNODE *leaf = swapToLeafBST(t, candidate);
     pruneLeafBST(t, leaf);
+    t->size -= 1;
     return leaf;
 }
 
@@ -236,8 +237,7 @@ void pruneLeafBST(BST *t, BSTNODE *leaf) {
         leaf->parent->left = 0;
     }
     else leaf->parent->right = 0;
-
-    t->size -= 1;
+    	
 }
 
 
@@ -270,8 +270,22 @@ static int minDepth(BSTNODE *root) {
     if (root->left == NULL || root->right == NULL) return 0;
     if (!root->left) return minDepth(root->right) + 1;
     if (!root->right) return minDepth(root->left) + 1;
+    
     return min(minDepth(root->left), minDepth(root->right)) + 1;
 }
+
+/*static int minDepth(BSTNODE *root) {
+	if (root == NULL) {
+	printf("Root NULL\n");
+	return -1;}
+	else {
+	int lDepth = minDepth(root->left);
+	int rDepth = maxDepth(root->right);
+	if (lDepth < rDepth) return (lDepth + 1);
+	else return (rDepth + 1);
+	}
+}*/
+
 static int maxDepth(BSTNODE *root) {
     if (root == NULL) return -1;
     else {
@@ -291,18 +305,18 @@ void statisticsBST(BST *t,FILE *fp){
 void levelOrder(BST *h, FILE* fp, BSTNODE* root){
         if (root == NULL) return;
                 //struct Queue *q = newQUEUEn(h->display, h->free);
-                QUEUE *q = newQUEUE(h->display,h->free);
-                int nodesInCurrentLevel = 1;
+		 QUEUE *q = newQUEUE(h->display,h->free);
+		int nodesInCurrentLevel = 1;
                 int nodesInNextLevel = 0;
-                enqueue(q,root);
-                while (sizeQUEUE(q) > 0){
+                enqueue(q,root); 
+		while (sizeQUEUE(q) > 0){
                 BSTNODE *node = dequeue(q);
                 //Dqueue(q);
                 nodesInCurrentLevel--;
-                if (node){
+		if (node){
                 h->display(node->value, fp);
                 if (nodesInCurrentLevel > 0) fprintf(fp," ");
-
+	
                 if (node->left != NULL){
                 enqueue(q,node->left );
                 nodesInNextLevel += 1;
@@ -321,9 +335,67 @@ void levelOrder(BST *h, FILE* fp, BSTNODE* root){
         freeQUEUE(q);
 }
 
+void levelOrderDecorate(BST *h, FILE *fp, BSTNODE *root){
+	if (root == NULL) return;
+		QUEUE *q = newQUEUE(h->display, h->free);
+		int nodesInCurrentLevel = 1;
+		int nodesInNextLevel = 0;
+		bool printLevel = true;
+		int levelNumbers = 0;
+		enqueue(q,root);
+		while (sizeQUEUE(q) > 0){
+		BSTNODE *node = dequeue(q);	
+		nodesInCurrentLevel--;
+		if(node){
+		if (printLevel == true) fprintf (fp,"%d: ", levelNumbers);
+		printLevel = false;
+		if (node->left == NULL && node->right == NULL) fprintf (fp, "=");
+		h->display(node->value, fp);
+		//if (nodesInCurrentLevel > 0) fprintf(fp, " ");
+	
+		if (node->parent != NULL) {
+		fprintf (fp, "(");
+		h->display(node->parent->value, fp);
+		fprintf (fp, ")");
+		}
+		else {
+		fprintf (fp, "(");
+		h->display (node->value, fp);
+		fprintf (fp, ")");
+		}
+		if (node->parent == NULL) fprintf (fp,"X"); 
+		else if ((node->parent->right != NULL) && (h->compare(node->parent->right->value, node->value)==0)) fprintf (fp,"R");
+		else if ((node->parent->left != NULL) && (h->compare(node->parent->left->value, node->value) ==0)) fprintf (fp,"L");
+		if (nodesInCurrentLevel > 0) fprintf(fp, " ");
+		if (node->left != NULL){
+		enqueue(q, node->left);
+		nodesInNextLevel += 1;
+		}
+		if (node->right != NULL){
+		enqueue(q, node->right);
+		nodesInNextLevel += 1;
+		}
+		}
+		if (nodesInCurrentLevel == 0){
+		fprintf(fp, "\n");
+		printLevel = true;
+		levelNumbers++;
+		nodesInCurrentLevel = nodesInNextLevel;
+		nodesInNextLevel = 0;
+		}
+		}
+	freeQUEUE(q);
+}
+
+void displayBSTdecorated(BST*t, FILE *fp){
+	if (t->root == NULL) return;
+	levelOrderDecorate(t, fp, t->root);
+}
 
 void displayBSTdebug(BST *t,FILE *fp){
-if (t->root == NULL) return;
+if (t->root == NULL) {
+return;
+}
 levelOrder(t,fp,t->root);
 }
 

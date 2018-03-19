@@ -1,8 +1,17 @@
-OBJS = integer.o sll.o dll.o stack.o queue.o real.o string.o bst.o heap.o heapsort.o scanner.o bst-0-0.o heap-0-0.o 
+OBJS = integer.o sll.o dll.o stack.o queue.o real.o string.o bst.o heap.o heapsort.o scanner.o bst-0-0.o heap-0-0.o gst.o gst-0-0.o avl.o avl-0-0.o trees.o 
 OOPTS = -Wall -Wextra -g -c
 LOPTS = -Wall -Wextra -g
 
-all : test-bst test-heap heapsort test-sll test-dll test-stack test-queue
+all : trees test-avl test-gst test-bst test-heap heapsort test-sll test-dll test-stack test-queue 
+
+trees	:trees.o string.o bst.o gst.o avl.o scanner.o queue.o
+	gcc -Wall -Wextra -g trees.c string.c scanner.c bst.c avl.c gst.c queue.c -o trees 
+
+test-avl	: avl-0-0.o string.o integer.o real.o bst.o avl.o queue.o
+	gcc $(LOPTS) avl-0-0.o integer.o real.o string.o bst.o avl.o queue.o -o test-avl
+
+test-gst	: gst-0-0.o string.o integer.o real.o bst.o gst.o queue.o
+	gcc $(LOPTS) gst-0-0.o integer.o real.o string.o bst.o gst.o queue.o -o test-gst
 
 test-bst	: bst-0-0.o integer.o real.o string.o bst.o queue.o 
 	gcc $(LOPTS) bst-0-0.o integer.o real.o string.o bst.o queue.o -o test-bst
@@ -25,11 +34,20 @@ test-stack : test-stack.o integer.o dll.o stack.o
 test-queue : test-queue.o integer.o sll.o queue.o
 	gcc $(LOPTS) test-queue.o integer.o sll.o queue.o -o test-queue
 
+avl-0-0.o : avl-0-0.c integer.h real.h string.h bst.h avl.h
+	gcc $(OOPTS) avl-0-0.c
+
+gst-0-0.o : gst-0-0.c integer.h real.h string.h bst.h gst.h
+	gcc $(OOPTS) gst-0-0.c
+
 bst-0-0.o : bst-0-0.c integer.h real.h string.h bst.h queue.h stack.h
 	gcc $(OOPTS) bst-0-0.c
 
 heap-0-0.o : heap-0-0.c integer.h real.h string.h heap.h bst.h queue.h stack.h
 	gcc $(OOPTS) heap-0-0.c
+
+trees.o : trees.c scanner.h string.h bst.h gst.h avl.h
+	gcc $(OOPTS) trees.c
 
 heapsort.o : heapsort.c integer.h real.h string.h scanner.h queue.h stack.h bst.h heap.h
 	gcc $(OOPTS) heapsort.c
@@ -46,6 +64,12 @@ test-stack.o : test-stack.c stack.h integer.h
 test-queue.o : test-queue.c queue.h integer.h
 	gcc $(OOPTS) test-queue.c
 
+avl.o : avl.c avl.h
+	gcc $(OOPTS) avl.c
+
+gst.o : gst.c gst.h
+	gcc $(OOPTS) gst.c
+
 bst.o : bst.c bst.h
 	gcc $(OOPTS) bst.c
 
@@ -54,12 +78,6 @@ heap.o : heap.c heap.h
 
 scanner.o : scanner.c scanner.h
 	gcc $(OOPTS) scanner.c
-
-hqueue.o : hqueue.c hqueue.h
-	gcc $(OOPTS) hqueue.c
-
-btree.o : btree.c btree.h
-	gcc $(OOPTS) btree.c
 
 stack.o : stack.c stack.h
 	gcc $(OOPTS) stack.c
@@ -101,6 +119,13 @@ valgrind  : all
 	echo testing heap
 	valgrind ./test-heap
 	echo
+	echo testing gst
+	valgrind ./test-gst
+	echo
+	echo
+	echo testing avl
+	valgrind ./test-avl
+	echo
 
 test	: all
 	echo testing singly-linked list
@@ -123,6 +148,14 @@ test	: all
 	echo testing heapsort
 	./heapsort hs-0-0.data
 	echo
+	echo testing gst
+	./test-gst
+	echo
+	echo testing avl
+	./test-avl
+	echo
+	echo testing trees
+	./trees t-0-0.data t-0-0.more
 
 clean    :
-	rm -f $(OBJS) test-*.o test-stack test-queue test-sll test-dll test-heap test-bst heapsort   
+	rm -f $(OBJS) test-*.o test-stack test-queue test-sll test-dll test-heap test-bst heapsort test-gst test-avl trees 
